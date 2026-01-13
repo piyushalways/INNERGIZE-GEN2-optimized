@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(west build:*)",
+      "Bash(ninja:*)"
+    ]
+  }
+}

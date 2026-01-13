@@ -1,0 +1,184 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-5-Clause
+ */
+
+#include <dt-bindings/regulator/npm1300.h>
+
+
+
+&i2c21 {
+	status = "okay";
+};
+
+
+&npm1300_ek_pmic {
+	host-int-gpios = <&gpio1 6 0>;
+	pmic-int-pin = <1>;
+};
+
+&npm1300_ek_gpio {
+	status = "okay";
+};
+
+
+&npm1300_ek_charger {
+			compatible = "nordic,npm1300-charger";
+			term-microvolt = <4200000>; 
+			term-warm-microvolt = <4000000>;
+			current-microamp = <150000>;
+			dischg-limit-microamp = <1000000>;
+			vbus-limit-microamp = <500000>;
+			/* Disable battery NTC */
+	        thermistor-ohms = <10000>;
+			thermistor-beta = <3380>;
+			charging-enable;
+		};
+
+
+		/* Turn ON nPM1300 BUCK1 and BUCK2 on the EK */
+
+&npm1300_ek_buck1 {
+	/* Set to your required rail; example: 1.8 V */
+	regulator-min-microvolt = <3000000>;
+	regulator-max-microvolt = <3000000>;
+
+	/* Make sure it’s on at boot (and kept on) */
+	regulator-boot-on;
+	regulator-always-on;
+	/* Enable forced PWM mode */
+	regulator-allowed-modes = <NPM1300_BUCK_MODE_PWM>;
+	regulator-initial-mode = <NPM1300_BUCK_MODE_PWM>;
+	status = "okay";
+};
+
+&npm1300_ek_buck2 {
+	/* Set to your required rail; example: 3.3 V */
+	regulator-min-microvolt = <2200000>;
+	regulator-max-microvolt = <2200000>;
+
+	/* Make sure it's on at boot (and kept on) */
+	regulator-boot-on;
+	regulator-always-on;
+	/* Enable forced PWM mode */
+	regulator-allowed-modes = <NPM1300_BUCK_MODE_PWM>;
+	regulator-initial-mode = <NPM1300_BUCK_MODE_PWM>;
+	status = "okay";
+};
+
+/* Configure LDO1 in Load Switch mode */
+&npm1300_ek_ldo1 {
+	regulator-allowed-modes = <NPM1300_LDSW_MODE_LDSW>;
+	regulator-initial-mode = <NPM1300_LDSW_MODE_LDSW>;
+	regulator-boot-on;
+	status = "okay";
+};
+
+/* Configure LDO2 in Load Switch mode */
+&npm1300_ek_ldo2 {
+	regulator-allowed-modes = <NPM1300_LDSW_MODE_LDSW>;
+	regulator-initial-mode = <NPM1300_LDSW_MODE_LDSW>;
+	regulator-boot-on;
+	status = "okay";
+};
+
+/*
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ */
+
+/{
+    gpio_outputs{
+        compatible = "gpio-leds";
+        // Channel 0 GPIO pin
+        chan0_gpio: chan0_gpio{
+            gpios = < &gpio0 0 GPIO_ACTIVE_HIGH >;
+        };
+        blue_led_output: blue_led_output{
+            gpios = <&gpio1 10 GPIO_PULL_DOWN>;
+        };
+        red_led_output: red_led_output{
+            gpios = <&gpio1 14 GPIO_PULL_DOWN>;
+        };
+        green_led_output: green_led_output{
+            gpios = < &gpio2 7 GPIO_ACTIVE_HIGH >;
+        };
+    };
+
+    buttons{
+        compatible = "gpio-keys";
+        button0: button_0 {
+			gpios = <&npm1300_ek_gpio 0 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "npm1300 GPIO0 button";
+		};
+        button1: button_1 {
+			gpios = <&gpio1 11 (GPIO_PULL_UP | GPIO_ACTIVE_HIGH)>;
+			label = "Sleep/Wakeup Pin";
+		};
+    };
+    
+
+    zephyr,user {
+		io-channels = <&adc 1>; // Channel 1
+	};
+
+    aliases{
+        ems-chan0-gpio = &chan0_gpio;
+        blue-led = &blue_led_output;
+        red-led = &red_led_output;
+        green-led = &blue_led_output;
+        on-button = &button0;
+        sleep-wakeup-button = &button1;
+    };
+};
+
+&adc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@1 {
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS,40)>;
+		zephyr,input-positive = <NRF_SAADC_AIN1>; /* P1.06 */
+		zephyr,resolution = <12>;
+		zephyr,oversampling = <8>;
+	};
+};
+
+&wdt31 {
+	status = "okay";
+};
+
+      &grtc {
+        pinctrl-0 = <&grtc_default>;
+        pinctrl-1 = <&grtc_sleep>;
+        pinctrl-names = "default", "sleep";
+        clkout-fast-frequency = <8000000>;
+        clkout-32k;
+        /* In case of nRF54H20 devices: */
+        nordic,clockpin-enable = <NRF_FUN_GRTC_CLKOUT_FAST>;
+      };
+
+/* Switch from UART20 to UART30 */
+&uart20 {
+	status = "disabled";
+};
+
+&uart30 {
+	status = "okay";
+	current-speed = <115200>;
+};
+
+/ {
+	chosen {
+		zephyr,console = &uart30;
+		zephyr,shell-uart = &uart30;
+		zephyr,uart-mcumgr = &uart30;
+		zephyr,bt-mon-uart = &uart30;
+		zephyr,bt-c2h-uart = &uart30;
+	};
+};

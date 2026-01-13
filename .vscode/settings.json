@@ -1,0 +1,33 @@
+{
+    "files.associations": {
+        "nrf_grtc_timer.h": "c",
+        "startup.h": "c",
+        "bluetooth_manager.h": "c",
+        "core_types.h": "c",
+        "io_adapter.h": "c",
+        "reboot.h": "c",
+        "nrf_gpio.h": "c",
+        "device_runtime.h": "c",
+        "hci.h": "c",
+        "nrfx_grtc.h": "c",
+        "nrf_grtc.h": "c",
+        "random": "c",
+        "gatt.h": "c",
+        "algorithm": "c",
+        "memory": "c",
+        "ostream": "c",
+        "streambuf": "c",
+        "limits": "c",
+        "tuple": "c",
+        "numbers": "c",
+        "device.h": "c",
+        "kernel.h": "c",
+        "eda.h": "c",
+        "functional": "c",
+        "ctime": "c",
+        "settings.h": "c",
+        "fast_pair.h": "c",
+        "nrfy_grtc.h": "c",
+        "hwinfo.h": "c"
+    }
+}
